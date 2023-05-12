@@ -38,7 +38,7 @@ def calculate_total_price(input_dict):
     total_price = 0
     for url in input_dict:
         item_price = get_item_price(url) * input_dict[url]
-        total_price = round(total_price + item_price, 3)
+        total_price = round(total_price + item_price, 2)
     print(total_price)
 
 
@@ -56,7 +56,7 @@ def insert_item():
         url = input("Enter a URL for an item: ")
         if find_item(item_dictionary, url) is True:
             print("Item already in JSON file.")
-        else:
+        elif url.startswith("https://steamcommunity.com/market/listings/"):
             try:
                 count = int(input("Enter the number of items: "))
             except ValueError:
@@ -67,6 +67,8 @@ def insert_item():
                 else:
                     item_dictionary.update({url: count})
                     answer = input("Continue? Y/N: ").upper()
+        else:
+            print("URL entered is not valid.")
 
     json_object = json.dumps(item_dictionary, indent=4)
     with open("item_list.json", "w") as write_json_file:
@@ -81,7 +83,7 @@ def update_item():
     print("Choose an item to update item count of: ")
     for url, amount in update_dict.items():
         counter += 1
-        print("{}) {}: {}".format(counter, ' '.join(get_item_name(url)), amount))
+        print("{}) {}: {}".format(counter, get_item_name(url), amount))
 
     try:
         number_answer = int(input("Enter number of item: "))
