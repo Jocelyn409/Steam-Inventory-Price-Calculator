@@ -3,6 +3,11 @@ import requests
 import json
 
 
+def get_item_name(url):
+    item = url.replace("https://steamcommunity.com/market/listings/", "")
+    item_name = item.split("/")
+    return ' '.join(item_name[1].split("%20"))
+
 def get_item_price(item):  # Add item_count as a parameter.
     currency = 1  # Hard coded currency (USD). Can be changed later if needed.
     item = item.replace("https://steamcommunity.com/market/listings/", "")
@@ -17,9 +22,10 @@ def get_item_price(item):  # Add item_count as a parameter.
     while True:
         response = requests.get(new_url)
         if response.status_code == 429:
-            print("Sleeping for 5 seconds...")
-            time.sleep(5)
+            print("Sleeping for 60 seconds to let Steam servers rest...")
+            time.sleep(60)
         else:
+            print(get_item_name(item) + " done...")
             break
 
     item_information = json.loads(response.text)  # Converts the json string to a dictionary.
@@ -31,8 +37,8 @@ def get_item_price(item):  # Add item_count as a parameter.
 def calculate_total_price(input_dict):
     total_price = 0
     for url in input_dict:
-        item_price = round(get_item_price(url) * input_dict[url], 2)
-        total_price = total_price + item_price
+        item_price = get_item_price(url) * input_dict[url]
+        total_price = round(total_price + item_price, 3)
     print(total_price)
 
 
@@ -51,9 +57,16 @@ def insert_item():
         if find_item(item_dictionary, url) is True:
             print("Item already in JSON file.")
         else:
-            count = int(input("Enter the number of items: "))
-            item_dictionary.update({url: count})
-            answer = input("Continue? Y/N: ").upper()
+            try:
+                count = int(input("Enter the number of items: "))
+            except ValueError:
+                print("An integer value must be entered.")
+            else:
+                if count == 0:
+                    print("Integer value is 0, thus no item was entered.")
+                else:
+                    item_dictionary.update({url: count})
+                    answer = input("Continue? Y/N: ").upper()
 
     json_object = json.dumps(item_dictionary, indent=4)
     with open("item_list.json", "w") as write_json_file:
@@ -66,21 +79,27 @@ def update_item():
 
     counter = 0
     print("Choose an item to update item count of: ")
-
     for url, amount in update_dict.items():
         counter += 1
-        item = url.replace("https://steamcommunity.com/market/listings/", "")
-        item_name = item.split("/")
-        item_name = item_name[1].split("%20")
-        print("{}) {}: {}".format(counter, ' '.join(item_name), amount))
+        print("{}) {}: {}".format(counter, ' '.join(get_item_name(url)), amount))
 
-    number_answer = int(input("Enter number of item: ")) - 1  # Zero based answer.
-    count_answer = int(input("Enter new item count: "))
+    try:
+        number_answer = int(input("Enter number of item: "))
+    except ValueError:
+        print("An integer value must be entered.")
+        return
+    try:
+        count_answer = int(input("Enter new item count: "))
+    except ValueError:
+        print("An integer value must be entered.")
+        return
 
-    if count_answer is 0:
+    if count_answer == 0:
         del update_dict[list(update_dict.keys())[number_answer]]
-    else:
+    elif isinstance(count_answer, int):
         update_dict.update({list(update_dict.keys())[number_answer]: count_answer})
+    else:
+        print("An integer value must be entered for both the item number and the new item count.")
 
     json_object = json.dumps(update_dict, indent=4)
     with open("item_list.json", "w") as write_json_file:
@@ -95,14 +114,20 @@ if __name__ == "__main__":
 
     # need to update count somehow. if new count is 0, simply remove the item from the list...?
 
-    selection = input("[C] Calculate total inventory price\n"
-                      "[I] Insert item\n"
-                      "[U] Update item count\n"
-                      "Answer: ").upper()
-
-    if selection == 'C':
-        calculate_total_price(calculate_dictionary)
-    elif selection == 'I':
-        insert_item()
-    elif selection == 'U':
-        update_item()
+    selection = ""
+    while selection != 'Q':
+        selection = input("[C] Calculate total inventory price\n"
+                          "[I] Insert item\n"
+                          "[U] Update item count\n"
+                          "[Q] Quit program\n"
+                          "Selection: ").upper()
+        if selection == 'C':
+            calculate_total_price(calculate_dictionary)
+        elif selection == 'I':
+            insert_item()
+        elif selection == 'U':
+            update_item()
+        elif selection == 'Q':
+            quit(0)
+        else:
+            print("Enter a valid answer.")
