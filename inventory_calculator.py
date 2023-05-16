@@ -114,8 +114,6 @@ if __name__ == "__main__":
 
     # see full list of items and their individual prices with total price for that individual item.
 
-    # need to update count somehow. if new count is 0, simply remove the item from the list...?
-
     selection = ""
     while selection != 'Q':
         selection = input("[C] Calculate total inventory price\n"
