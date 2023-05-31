@@ -8,8 +8,9 @@ def get_item_name(url):
     item_name = item.split("/")
     return ' '.join(item_name[1].split("%20"))
 
+
 def get_item_price(item):  # Add item_count as a parameter.
-    currency = 1  # Hard coded currency (USD). Can be changed later if needed.
+    currency = 1  # Hard coded currency (1 = USD). Can be changed later if needed.
     item = item.replace("https://steamcommunity.com/market/listings/", "")
     split_item = item.split("/")  # Splits listing by game id and market hash name.
     game_id = split_item[0]  # Game ID of market listing.
@@ -42,11 +43,6 @@ def calculate_total_price(input_dict):
     print(total_price)
 
 
-def find_item(item_dict, item):
-    if item in item_dict:
-        return True
-
-
 def insert_item():
     with open("item_list.json", "r") as read_json_file:
         item_dictionary = json.load(read_json_file)
@@ -54,7 +50,7 @@ def insert_item():
     answer = "Y"
     while answer == "Y":
         url = input("Enter a URL for an item: ")
-        if find_item(item_dictionary, url) is True:
+        if url in item_dictionary:
             print("Item already in JSON file.")
         elif url.startswith("https://steamcommunity.com/market/listings/"):
             try:
@@ -62,11 +58,11 @@ def insert_item():
             except ValueError:
                 print("An integer value must be entered.")
             else:
-                if count == 0:
-                    print("Integer value is 0, thus no item was entered.")
-                else:
+                if count > 0:
                     item_dictionary.update({url: count})
                     answer = input("Continue? Y/N: ").upper()
+                else:
+                    print("Integer value is not greater than 0, thus no item was entered.")
         else:
             print("URL entered is not valid.")
 
