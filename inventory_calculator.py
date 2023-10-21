@@ -40,7 +40,8 @@ def calculate_total_price(input_dict):
     for url in input_dict:
         item_price = get_item_price(url) * input_dict[url]
         total_price = round(total_price + item_price, 2)
-    print("Total price of all items: " + str(total_price) + "\n")
+    print("Total price of all items: " + str(total_price) +
+          "\nWith tax: " + str(total_price * 0.86) + "\n")
 
 
 def insert_item():
