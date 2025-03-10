@@ -1,6 +1,7 @@
 import time
 import requests
 import json
+from colorama import Fore, Style
 
 
 def get_item_name(url):
@@ -38,8 +39,12 @@ def get_item_price(item):  # Add item_count as a parameter.
 def calculate_total_price(input_dict):
     total_price = 0
     for url in input_dict:
-        item_price = get_item_price(url) * input_dict[url]
-        total_price = round(total_price + item_price, 2)
+        try:
+            item_price = get_item_price(url) * input_dict[url]
+            total_price = round(total_price + item_price, 2)
+        except:
+            print(Fore.RED, "Error:", Style.RESET_ALL, "Could not calculate price of " + get_item_name(url) + ".")
+
     print("Total price of all items: " + str(total_price) +
           "\nWith tax: " + str(total_price * 0.86) + "\n")
 
