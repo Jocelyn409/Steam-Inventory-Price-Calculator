@@ -1,13 +1,14 @@
 import time
 import requests
 import json
+import re
 from colorama import Fore, Style
 
 
 def get_item_name(url):
     item = url.replace("https://steamcommunity.com/market/listings/", "")
     item_name = item.split("/")
-    return ' '.join(item_name[1].split("%20"))
+    return ' '.join(re.split('%20|%7C', item_name[1]))
 
 
 def get_item_price(item):  # Add item_count as a parameter.
